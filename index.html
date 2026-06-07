@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Happy Birthday!</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #080018;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Press Start 2P', monospace;
+      overflow: hidden;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ── Stars ────────────────────────────────── */
+    .star {
+      position: fixed;
+      background: #fff;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: twinkle var(--d, 3s) var(--delay, 0s) infinite alternate ease-in-out;
+    }
+    @keyframes twinkle {
+      from { opacity: 0.15; transform: scale(0.7); }
+      to   { opacity: 0.9;  transform: scale(1.2); }
+    }
+
+    /* ── Pokéball ─────────────────────────────── */
+    #main-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 36px;
+    }
+
+    .pokeball-wrapper {
+      width: 240px;
+      height: 240px;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .pokeball {
+      width: 240px;
+      height: 240px;
+      position: relative;
+      animation: float 3s ease-in-out infinite;
+      filter: drop-shadow(0 20px 40px rgba(200, 0, 0, 0.4));
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50%       { transform: translateY(-14px); }
+    }
+
+    .pokeball.shaking {
+      animation: shake 0.65s ease-in-out;
+    }
+
+    @keyframes shake {
+      0%,100% { transform: rotate(0deg) translateY(0); }
+      10%     { transform: rotate(-10deg) translateY(-4px); }
+      25%     { transform: rotate(10deg)  translateY(-6px); }
+      40%     { transform: rotate(-8deg)  translateY(-4px); }
+      55%     { transform: rotate(7deg)   translateY(-2px); }
+      70%     { transform: rotate(-4deg)  translateY(0); }
+      85%     { transform: rotate(3deg)   translateY(0); }
+    }
+
+    .pokeball.opening {
+      animation: none;
+      filter: drop-shadow(0 0 60px rgba(255, 255, 255, 0.8));
+    }
+
+    /* top half */
+    .pb-top {
+      position: absolute;
+      top: 0; left: 0;
+      width: 240px;
+      height: 120px;
+      border-radius: 120px 120px 0 0;
+      background: radial-gradient(circle at 38% 32%, #ff7a7a, #e00000 55%, #8a0000);
+      overflow: hidden;
+      transition: transform 0.85s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    /* shine on red half */
+    .pb-top::before {
+      content: '';
+      position: absolute;
+      top: 16px; left: 28px;
+      width: 72px; height: 38px;
+      background: rgba(255,255,255,0.28);
+      border-radius: 50%;
+      transform: rotate(-25deg);
+    }
+
+    /* bottom half */
+    .pb-bottom {
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 240px;
+      height: 120px;
+      border-radius: 0 0 120px 120px;
+      background: radial-gradient(circle at 62% 68%, #ffffff, #d8d8d8);
+      overflow: hidden;
+      transition: transform 0.85s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* band */
+    .pb-band {
+      position: absolute;
+      top: 50%; left: 0;
+      transform: translateY(-50%);
+      width: 240px;
+      height: 18px;
+      background: #111;
+      z-index: 2;
+      transition: opacity 0.25s 0.3s;
+    }
+
+    /* center button */
+    .pb-btn {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 48px; height: 48px;
+      background: #f0f0f0;
+      border-radius: 50%;
+      border: 8px solid #111;
+      z-index: 3;
+      transition: transform 0.4s 0.25s, opacity 0.4s 0.25s;
+      box-shadow: inset 0 2px 6px rgba(255,255,255,0.9),
+                  0 2px 4px rgba(0,0,0,0.4);
+    }
+    .pb-btn::after {
+      content: '';
+      position: absolute;
+      top: 3px; left: 6px;
+      width: 10px; height: 6px;
+      background: rgba(255,255,255,0.75);
+      border-radius: 50%;
+    }
+
+    /* opening state */
+    .pokeball.opening .pb-top    { transform: translateY(-150px); }
+    .pokeball.opening .pb-bottom { transform: translateY(150px); }
+    .pokeball.opening .pb-band   { opacity: 0; }
+    .pokeball.opening .pb-btn    { transform: translate(-50%, -50%) scale(2); opacity: 0; }
+
+    /* hint */
+    .hint {
+      color: rgba(255,255,255,0.65);
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      animation: pulse 2.2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.4; }
+      50%       { opacity: 1; }
+    }
+
+    /* ── Flash overlay ────────────────────────── */
+    #flash {
+      position: fixed; inset: 0;
+      background: #fff;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 100;
+      transition: opacity 0.18s ease;
+    }
+    #flash.on { opacity: 1; }
+
+    /* ── Reveal screen ────────────────────────── */
+    #reveal {
+      position: fixed; inset: 0;
+      background: radial-gradient(ellipse at 50% 40%, #1e0040 0%, #080018 70%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 50;
+      transition: opacity 0.5s ease;
+    }
+    #reveal.on {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    /* photo */
+    .photo-ring {
+      width: 230px; height: 230px;
+      border-radius: 50%;
+      border: 5px solid #e00000;
+      box-shadow:
+        0 0 0 3px rgba(255,255,255,0.15),
+        0 0 30px rgba(220, 0, 0, 0.7),
+        0 0 70px rgba(220, 0, 0, 0.35);
+      overflow: hidden;
+      transform: scale(0);
+      animation: none;
+    }
+    .photo-ring.pop {
+      animation: popIn 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    @keyframes popIn {
+      from { transform: scale(0); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+
+    .photo-ring img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      object-position: center 15%;
+      display: block;
+    }
+    .photo-placeholder {
+      width: 100%; height: 100%;
+      background: linear-gradient(135deg, #6a0dad, #c2185b);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 90px;
+      line-height: 1;
+    }
+
+    /* text */
+    .msg-main {
+      color: #fff;
+      font-size: 22px;
+      letter-spacing: 1px;
+      text-align: center;
+      line-height: 1.5;
+      opacity: 0;
+      text-shadow: 0 0 16px rgba(255, 220, 60, 0.9),
+                   0 0 40px rgba(255, 180, 0, 0.5);
+    }
+    .msg-main.show { animation: slideUp 0.7s ease forwards; }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(22px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Hearts ───────────────────────────────── */
+    .heart {
+      position: fixed;
+      pointer-events: none;
+      z-index: 200;
+      font-size: var(--sz, 24px);
+      line-height: 1;
+      animation: floatUp var(--dur, 4s) ease-in forwards;
+      opacity: 0;
+    }
+    @keyframes floatUp {
+      0%   { transform: translateY(0)      translateX(0)              rotate(0deg);   opacity: 0; }
+      10%  { opacity: 1; }
+      50%  { transform: translateY(-45vh)  translateX(var(--sway, 20px)) rotate(10deg); }
+      85%  { opacity: 0.8; }
+      100% { transform: translateY(-98vh)  translateX(0)              rotate(-5deg);  opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="flash"></div>
+
+  <!-- Main / pokeball screen -->
+  <div id="main-screen">
+    <div class="pokeball-wrapper" id="ballWrapper">
+      <div class="pokeball" id="ball">
+        <div class="pb-top"></div>
+        <div class="pb-bottom"></div>
+        <div class="pb-band"></div>
+        <div class="pb-btn"></div>
+      </div>
+    </div>
+    <p class="hint">Tap to open</p>
+  </div>
+
+  <!-- Reveal screen -->
+  <div id="reveal">
+    <div class="photo-ring" id="photoRing">
+      <img
+        src="sticker.webp"
+        alt=""
+        onerror="this.outerHTML='<div class=\'photo-placeholder\'>❤️</div>'"
+      />
+    </div>
+    <p class="msg-main" id="msgMain">I choose you</p>
+  </div>
+
+  <script>
+    // ── Stars ────────────────────────────────────
+    (function () {
+      for (let i = 0; i < 130; i++) {
+        const s = document.createElement('div');
+        s.className = 'star';
+        const sz = Math.random() * 2.5 + 0.8;
+        s.style.cssText = [
+          `width:${sz}px`,
+          `height:${sz}px`,
+          `top:${Math.random() * 100}vh`,
+          `left:${Math.random() * 100}vw`,
+          `--d:${(Math.random() * 3 + 2).toFixed(1)}s`,
+          `--delay:${(Math.random() * 4).toFixed(1)}s`,
+        ].join(';');
+        document.body.appendChild(s);
+      }
+    })();
+
+    // ── Sound ────────────────────────────────────
+    function playSound() {
+      try {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return;
+        const ctx = new AC();
+
+        // Noise burst (whoosh)
+        const len = Math.floor(ctx.sampleRate * 0.7);
+        const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+        const d   = buf.getChannelData(0);
+        for (let i = 0; i < len; i++) {
+          d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 1.8) * 0.18;
+        }
+        const src = ctx.createBufferSource();
+        src.buffer = buf;
+        const gN = ctx.createGain();
+        gN.gain.setValueAtTime(1, ctx.currentTime);
+        gN.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.65);
+        src.connect(gN).connect(ctx.destination);
+        src.start();
+
+        // Rising sweep tone
+        const o1 = ctx.createOscillator();
+        const g1 = ctx.createGain();
+        o1.type = 'sine';
+        o1.frequency.setValueAtTime(260, ctx.currentTime);
+        o1.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.55);
+        g1.gain.setValueAtTime(0.22, ctx.currentTime);
+        g1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.75);
+        o1.connect(g1).connect(ctx.destination);
+        o1.start(); o1.stop(ctx.currentTime + 0.75);
+
+        // Bright high ping that fades in then out
+        const o2 = ctx.createOscillator();
+        const g2 = ctx.createGain();
+        o2.type = 'sine';
+        o2.frequency.setValueAtTime(1500, ctx.currentTime + 0.1);
+        o2.frequency.exponentialRampToValueAtTime(1000, ctx.currentTime + 0.6);
+        g2.gain.setValueAtTime(0, ctx.currentTime);
+        g2.gain.linearRampToValueAtTime(0.18, ctx.currentTime + 0.12);
+        g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.65);
+        o2.connect(g2).connect(ctx.destination);
+        o2.start(ctx.currentTime + 0.08); o2.stop(ctx.currentTime + 0.65);
+      } catch (_) {}
+    }
+
+    // ── Hearts ───────────────────────────────────
+    function spawnHearts() {
+      const colors = ['#fff','#ffb6c1','#ff69b4','#ff1493','#ffe4e1','#ffccd5'];
+      for (let i = 0; i < 40; i++) {
+        setTimeout(() => {
+          const el = document.createElement('span');
+          el.className = 'heart';
+          el.textContent = '♥';
+          const sz   = Math.floor(Math.random() * 25 + 16);
+          const sway = (Math.random() * 60 - 30).toFixed(0);
+          el.style.cssText = [
+            `left:${(Math.random() * 90 + 5).toFixed(1)}vw`,
+            `bottom:5vh`,
+            `color:${colors[Math.floor(Math.random() * colors.length)]}`,
+            `--sz:${sz}px`,
+            `--dur:${(Math.random() * 3 + 3.5).toFixed(1)}s`,
+            `--sway:${sway}px`,
+          ].join(';');
+          document.body.appendChild(el);
+          setTimeout(() => el.remove(), 8000);
+        }, Math.random() * 2000);
+      }
+    }
+
+    // ── Open sequence ─────────────────────────────
+    let opened = false;
+
+    function open() {
+      if (opened) return;
+      opened = true;
+
+      playSound();
+
+      const ball  = document.getElementById('ball');
+      const flash = document.getElementById('flash');
+
+      // 1. Shake
+      ball.classList.add('shaking');
+
+      // 2. Open halves
+      setTimeout(() => {
+        ball.classList.remove('shaking');
+        ball.classList.add('opening');
+      }, 720);
+
+      // 3. Flash white
+      setTimeout(() => flash.classList.add('on'), 1450);
+
+      // 4. Reveal
+      setTimeout(() => {
+        document.getElementById('main-screen').style.display = 'none';
+        flash.classList.remove('on');
+
+        const rv = document.getElementById('reveal');
+        rv.classList.add('on');
+
+        // Animate photo + text
+        const ring = document.getElementById('photoRing');
+        ring.classList.add('pop');
+
+        setTimeout(() => document.getElementById('msgMain').classList.add('show'), 350);
+
+        spawnHearts();
+      }, 1820);
+    }
+
+    document.getElementById('ballWrapper').addEventListener('click',  open);
+    document.getElementById('ballWrapper').addEventListener('touchend', function(e) {
+      e.preventDefault();
+      open();
+    });
+  </script>
+</body>
+</html>
