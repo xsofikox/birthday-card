@@ -11,7 +11,7 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      background: #080018;
+      background: linear-gradient(180deg, #4db8f0 0%, #85d4f5 55%, #c4eeff 100%);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -23,17 +23,18 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* ── Stars ────────────────────────────────── */
-    .star {
+    /* ── Clouds ───────────────────────────────── */
+    .cloud {
       position: fixed;
-      background: #fff;
-      border-radius: 50%;
       pointer-events: none;
-      animation: twinkle var(--d, 3s) var(--delay, 0s) infinite alternate ease-in-out;
+      top: var(--top, 10%);
+      filter: drop-shadow(0 8px 16px rgba(100, 170, 230, 0.45));
+      animation: drift var(--spd, 40s) linear var(--delay, 0s) infinite;
+      z-index: 0;
     }
-    @keyframes twinkle {
-      from { opacity: 0.15; transform: scale(0.7); }
-      to   { opacity: 0.9;  transform: scale(1.2); }
+    @keyframes drift {
+      from { transform: translateX(115vw); }
+      to   { transform: translateX(-110%); }
     }
 
     /* ── Pokéball ─────────────────────────────── */
@@ -49,6 +50,7 @@
       height: 240px;
       position: relative;
       cursor: pointer;
+      z-index: 10;
     }
 
     .pokeball {
@@ -160,7 +162,7 @@
 
     /* hint */
     .hint {
-      color: rgba(255,255,255,0.65);
+      color: rgba(0, 60, 120, 0.85);
       font-size: 11px;
       letter-spacing: 2px;
       text-transform: uppercase;
@@ -185,7 +187,7 @@
     /* ── Reveal screen ────────────────────────── */
     #reveal {
       position: fixed; inset: 0;
-      background: radial-gradient(ellipse at 50% 40%, #1e0040 0%, #080018 70%);
+      background: transparent;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -246,8 +248,10 @@
       text-align: center;
       line-height: 1.5;
       opacity: 0;
-      text-shadow: 0 0 16px rgba(255, 220, 60, 0.9),
-                   0 0 40px rgba(255, 180, 0, 0.5);
+      text-shadow:
+        0 2px 6px rgba(0,0,0,0.55),
+        0 0 20px rgba(255, 220, 60, 0.9),
+        0 0 40px rgba(255, 180, 0, 0.5);
     }
     .msg-main.show { animation: slideUp 0.7s ease forwards; }
 
@@ -305,22 +309,29 @@
   </div>
 
   <script>
-    // ── Stars ────────────────────────────────────
+    // ── Clouds ───────────────────────────────────
     (function () {
-      for (let i = 0; i < 130; i++) {
-        const s = document.createElement('div');
-        s.className = 'star';
-        const sz = Math.random() * 2.5 + 0.8;
-        s.style.cssText = [
-          `width:${sz}px`,
-          `height:${sz}px`,
-          `top:${Math.random() * 100}vh`,
-          `left:${Math.random() * 100}vw`,
-          `--d:${(Math.random() * 3 + 2).toFixed(1)}s`,
-          `--delay:${(Math.random() * 4).toFixed(1)}s`,
-        ].join(';');
-        document.body.appendChild(s);
-      }
+      // Each config: width (px), top (%), drift speed (s), animation delay (s)
+      const configs = [
+        { w: 290, top:  3, spd: 44, delay:   0 },
+        { w: 200, top: 20, spd: 56, delay: -20 },
+        { w: 330, top:  0, spd: 48, delay: -32 },
+        { w: 220, top: 33, spd: 46, delay: -10 },
+        { w: 170, top: 15, spd: 60, delay: -42 },
+        { w: 300, top: 26, spd: 43, delay: -25 },
+        { w: 180, top:  8, spd: 50, delay: -14 },
+        { w: 240, top: 40, spd: 52, delay: -36 },
+        { w: 150, top: 28, spd: 65, delay:  -5 },
+        { w: 260, top: 12, spd: 47, delay: -50 },
+      ];
+
+      configs.forEach(c => {
+        const img = document.createElement('img');
+        img.src = 'cloud.png';
+        img.className = 'cloud';
+        img.style.cssText = `width:${c.w}px;--top:${c.top}%;--spd:${c.spd}s;--delay:${c.delay}s`;
+        document.body.appendChild(img);
+      });
     })();
 
     // ── Sound ────────────────────────────────────
